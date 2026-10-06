@@ -4,7 +4,7 @@
 #include "vm.h"
 
 int main(int argc, char* argv[]) {
-  if (argc != 2) {
+  if (argc < 2) {
     fprintf(stderr, "Usage: chip8 <filename>\n");
     return EXIT_FAILURE;
   }
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
-  switch (vm_load_bin(&vm, buf, sizeof(buf))) {
+  switch (vm_load_bin(&vm, buf, bytes_read)) {
     case VM_LOAD_ERR_EXCEEDS_MEMORY:
       fprintf(stderr, "Load binary error: exceeds memory\n");
       return EXIT_FAILURE;
@@ -47,6 +47,8 @@ int main(int argc, char* argv[]) {
 
   switch (exec_res) {
     case VM_EXEC_RES_COMPLETE:
+      break;
+    case VM_EXEC_RES_INVALID_INSTR:
       break;
     default:
       fprintf(stderr, "Unexpected execution result encountered.");

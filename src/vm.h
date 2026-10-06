@@ -9,7 +9,7 @@
 #define VM_STACK_SIZE 64
 
 // Amount of V registers.
-#define VM_REG_V_COUNT 5
+#define VM_REG_V_COUNT 16
 
 #define VM_FONT_LOAD_ADDR 0x0
 #define VM_FONT_MAX_ADDR 0x80
@@ -50,6 +50,7 @@ enum vm_load_err {
 enum vm_load_err vm_load_bin(struct vm_ctx* ctx, uint8_t* bin, size_t size);
 
 enum vm_exec_res {
+  VM_EXEC_RES_INVALID_INSTR = -1,
   VM_EXEC_RES_CONTINUE = 0,
   VM_EXEC_RES_COMPLETE = 1,
 };
