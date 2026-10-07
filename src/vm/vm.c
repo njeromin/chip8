@@ -78,11 +78,13 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
             ctx->registers.pc = ctx->stack[ctx->registers.sp];
             ctx->registers.sp -= 1;
             break;
+          case 0x000:
+            // Nop
+            return VM_EXEC_RES_INVALID_INSTR;
           default:
             // Call NNN.
             // NOTE: This does not need to implemented.
-            printf("Unexpected instruction call: 0nnn\n");
-            break;
+            return VM_EXEC_RES_INVALID_INSTR;
         }
 
         break;
@@ -207,7 +209,8 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
           case 0x5:
             {
               // VX -= VY
-              uint8_t not_borrow = (ctx->registers.v[x] >= ctx->registers.v[y]) ? 1 : 0;
+              uint8_t not_borrow =
+                  (ctx->registers.v[x] >= ctx->registers.v[y]) ? 1 : 0;
               uint8_t res = ctx->registers.v[x] - ctx->registers.v[y];
 
               // VF = 0 when underflow, 1 when no underflow.
@@ -231,7 +234,8 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
           case 0x7:
             {
               // VX = VY - VX
-              uint8_t not_borrow = (ctx->registers.v[y] >= ctx->registers.v[x]) ? 1 : 0;
+              uint8_t not_borrow =
+                  (ctx->registers.v[y] >= ctx->registers.v[x]) ? 1 : 0;
               uint8_t res = ctx->registers.v[y] - ctx->registers.v[x];
 
               // VF = 0 when underflow, 1 when no underflow.

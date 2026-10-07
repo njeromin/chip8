@@ -6,5 +6,5 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(chip8 src/main.c src/vm/vm.c src/vm/opcode.c src/io/display.c src/platform/thread.c)
+add_executable(chip8 src/main.c src/vm/vm.c src/vm/opcode.c src/io/display.c src/platform/thread.c src/debug/debug.c)
 target_include_directories(chip8 PRIVATE src)

@@ -1,6 +1,8 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "debug/debug.h"
 #include "io/display.h"
 #include "platform/thread.h"
 #include "vm/vm.h"
@@ -55,7 +57,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (exec_res == VM_EXEC_RES_HALTED) {
-      platform_sleep(1000 / 24);
+      platform_sleep(1000);
     }
   }
 
@@ -64,8 +66,15 @@ int main(int argc, char* argv[]) {
     case VM_EXEC_RES_HALTED:
       break;
     case VM_EXEC_RES_INVALID_INSTR:
-      fprintf(stderr, "Encountered invalid instruction.");
-      break;
+      {
+        opcode_t op = opcode_from_u8s(vm.memory[vm.registers.pc],
+                                      vm.memory[vm.registers.pc + 1]);
+        uint8_t id = opcode_id(op);
+
+        fprintf(stderr, "Encountered invalid instruction: %s\n",
+                debug_instruction_id_class(id));
+        break;
+      }
     default:
       fprintf(stderr, "Unexpected execution result encountered.");
       return EXIT_FAILURE;
