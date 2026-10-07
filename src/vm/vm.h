@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -38,6 +39,7 @@ struct vm_ctx {
   uint8_t stack[VM_STACK_SIZE];
   uint8_t memory[VM_MEMORY_SIZE];
   uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES];
+  bool should_draw;
 };
 
 void vm_ctx_init(struct vm_ctx* ctx);
@@ -53,6 +55,7 @@ enum vm_exec_res {
   VM_EXEC_RES_INVALID_INSTR = -1,
   VM_EXEC_RES_CONTINUE = 0,
   VM_EXEC_RES_COMPLETE = 1,
+  VM_EXEC_RES_HALTED = 2,
 };
 
 enum vm_exec_res vm_exec_next(struct vm_ctx* ctx);

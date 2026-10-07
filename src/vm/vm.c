@@ -32,6 +32,8 @@ void vm_ctx_init(struct vm_ctx* ctx) {
   memcpy(ctx->memory + VM_FONT_LOAD_ADDR, CHIP8_FONTSET, sizeof(CHIP8_FONTSET));
 
   clear_display(ctx);
+
+  ctx->should_draw = false;
 }
 
 enum vm_load_err vm_load_bin(struct vm_ctx* ctx, uint8_t* bin, size_t size) {
@@ -69,6 +71,7 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
           case 0x0E0:
             // Clear the screen.
             clear_display(ctx);
+            ctx->should_draw = true;
             break;
           case 0x0EE:
             // Return.
@@ -88,8 +91,15 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
       {
         // Jump to address NNN.
         uint16_t nnn = opcode_nnn(code);
+
+        // Detect self-jump spinloop (halt)
+        if (nnn == ctx->registers.pc) {
+          return VM_EXEC_RES_HALTED;
+        }
+
         ctx->registers.pc = nnn;
         skip_pc_increment = true;
+
         break;
       }
     case 0x2:
@@ -281,6 +291,8 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
             ctx->framebuffer[byte_idx] ^= (1 << bit_offset);
           }
         }
+
+        ctx->should_draw = true;
 
         break;
       }

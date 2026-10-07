@@ -45,12 +45,21 @@ int main(int argc, char* argv[]) {
   }
 
   enum vm_exec_res exec_res;
-  while ((exec_res = vm_exec_next(&vm)) == VM_EXEC_RES_CONTINUE) {
-    display_show(0, 0, vm.framebuffer);
+  while ((exec_res = vm_exec_next(&vm)) == VM_EXEC_RES_CONTINUE ||
+         exec_res == VM_EXEC_RES_HALTED) {
+    if (vm.should_draw) {
+      display_show(0, 0, vm.framebuffer);
+      vm.should_draw = false;
+    }
+
+    if (exec_res == VM_EXEC_RES_HALTED) {
+      platform_sleep(1000 / 24);
+    }
   }
 
   switch (exec_res) {
     case VM_EXEC_RES_COMPLETE:
+    case VM_EXEC_RES_HALTED:
       break;
     case VM_EXEC_RES_INVALID_INSTR:
       fprintf(stderr, "Encountered invalid instruction.");
