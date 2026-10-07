@@ -44,6 +44,8 @@ int main(int argc, char* argv[]) {
       break;
   }
 
+  display_init();
+
   enum vm_exec_res exec_res;
   while ((exec_res = vm_exec_next(&vm)) == VM_EXEC_RES_CONTINUE ||
          exec_res == VM_EXEC_RES_HALTED) {

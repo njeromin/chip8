@@ -177,22 +177,40 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
 
         switch (n) {
           case 0x0:
+            // VX = VY
+            ctx->registers.v[x] = ctx->registers.v[y];
             break;
           case 0x1:
+            // VX |= VY
+            ctx->registers.v[x] |= ctx->registers.v[y];
             break;
           case 0x2:
+            // VX &= VY
+            ctx->registers.v[x] &= ctx->registers.v[y];
             break;
           case 0x3:
+            // VX ^= VY
+            ctx->registers.v[x] ^= ctx->registers.v[y];
             break;
           case 0x4:
+            // VX += VY
+            ctx->registers.v[x] += ctx->registers.v[y];
             break;
           case 0x5:
+            // VX -= VY
+            ctx->registers.v[x] -= ctx->registers.v[y];
             break;
           case 0x6:
+            // VX >>= 1
+            ctx->registers.v[x] >>= 1;
             break;
           case 0x7:
+            // VX = VY - VX
+            ctx->registers.v[x] = ctx->registers.v[y] - ctx->registers.v[x];
             break;
           case 0xE:
+            // VX <<= 1
+            ctx->registers.v[x] <<= 1;
             break;
         }
 
@@ -318,14 +336,22 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
 
         switch (nn) {
           case 0x07:
+            // Set VX to the value of the delay timer.
+            ctx->registers.v[x] = ctx->registers.dt;
             break;
           case 0x0A:
             break;
           case 0x15:
+            // Set the delay timer to the value in VX.
+            ctx->registers.dt = ctx->registers.v[x];
             break;
           case 0x18:
+            // Set the sound timer to the value in VX.
+            ctx->registers.st = ctx->registers.v[x];
             break;
           case 0x1E:
+            // Add VX to I.
+            ctx->registers.i = ctx->registers.v[x];
             break;
           case 0x29:
             // Set I to the memory address of the sprite for digit in Vx (0x0 - 0xF)

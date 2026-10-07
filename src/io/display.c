@@ -19,6 +19,10 @@ static void calc_bit_pos(size_t x, size_t y,
   *bit_offset = 7 - (x % 8);
 }
 
+void display_init() {
+  printf("\e[1;1H\e[2J");
+}
+
 void display_show(size_t display_x, size_t display_y,
                   uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES]) {
   move_cursor(display_x, display_y);
