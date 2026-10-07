@@ -12,17 +12,15 @@ static void move_cursor(size_t x, size_t y) {
 #define LOWER_HALF "▄"
 #define EMPTY " "
 
-static void calc_bit_pos(
-    size_t x, size_t y,
-    uint8_t framebuffer[VM_FRAMEBUF_WIDTH_BYTES * VM_FRAMEBUF_HEIGHT_BYTES],
-    size_t* byte_index, size_t* bit_offset) {
+static void calc_bit_pos(size_t x, size_t y,
+                         uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES],
+                         size_t* byte_index, size_t* bit_offset) {
   *byte_index = (y * VM_FRAMEBUF_WIDTH + x) / 8;
   *bit_offset = 7 - (x % 8);
 }
 
-void display_show(
-    size_t display_x, size_t display_y,
-    uint8_t framebuffer[VM_FRAMEBUF_WIDTH_BYTES * VM_FRAMEBUF_HEIGHT_BYTES]) {
+void display_show(size_t display_x, size_t display_y,
+                  uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES]) {
   move_cursor(display_x, display_y);
 
   for (size_t y = 0; y + 1 < VM_FRAMEBUF_HEIGHT; y += 2) {

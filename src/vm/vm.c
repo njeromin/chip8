@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "vm/font.h"
 #include "vm/opcode.h"
 
 static void clear_display(struct vm_ctx* ctx) {
-  memset(ctx->framebuffer, 0,
-         VM_FRAMEBUF_WIDTH_BYTES * VM_FRAMEBUF_HEIGHT_BYTES);
+  memset(ctx->framebuffer, 0, VM_FRAMEBUF_SIZE_BYTES);
 }
 
 // Set all registers values to 0.
@@ -24,8 +24,13 @@ static void init_registers(struct vm_reg* registers) {
 
 void vm_ctx_init(struct vm_ctx* ctx) {
   init_registers(&ctx->registers);
+
   memset(ctx->stack, 0, sizeof(*ctx->stack) * VM_STACK_SIZE);
   memset(ctx->memory, 0, sizeof(*ctx->memory) * VM_MEMORY_SIZE);
+
+  // Load font sprites into memory.
+  memcpy(ctx->memory + VM_FONT_LOAD_ADDR, CHIP8_FONTSET, sizeof(CHIP8_FONTSET));
+
   clear_display(ctx);
 }
 
@@ -157,6 +162,8 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
     case 0x8:
       {
         uint8_t n = opcode_n(code);
+        uint8_t x = opcode_x(code);
+        uint8_t y = opcode_y(code);
 
         switch (n) {
           case 0x0:
@@ -188,6 +195,13 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
 
         if (n != 0) {
           return VM_EXEC_RES_INVALID_INSTR;
+        }
+
+        uint8_t x = opcode_x(code);
+        uint8_t y = opcode_y(code);
+
+        if (ctx->registers.v[x] > ctx->registers.v[y]) {
+          ctx->registers.pc += sizeof(opcode_t);
         }
 
         break;
@@ -223,7 +237,50 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
         // Draw a sprite at the coordinate (VX, VY) that has a width of 8 pixels, and a height of N pixels.
         uint8_t x = opcode_x(code);
         uint8_t y = opcode_y(code);
-        uint8_t n = opcode_n(code);
+        uint8_t n = opcode_n(code);  // height
+
+        // Starting coordinates (wrapped to display boundaries)
+        uint8_t start_x = ctx->registers.v[x] % VM_FRAMEBUF_WIDTH;
+        uint8_t start_y = ctx->registers.v[y] % VM_FRAMEBUF_HEIGHT;
+
+        // Reset collision flag
+        ctx->registers.v[0xF] = 0;
+
+        for (size_t row = 0; row < n; row++) {
+          size_t y = start_y + row;
+          // Clip sprite if it exceeds the bottom of the screen
+          if (y >= VM_FRAMEBUF_HEIGHT) {
+            break;
+          }
+
+          uint8_t sprite_byte = ctx->memory[ctx->registers.i + row];
+
+          for (size_t col = 0; col < 8; col++) {
+            size_t x = start_x + col;
+            // Clip sprite if it exceeds the right edge of the screen
+            if (x >= VM_FRAMEBUF_WIDTH) {
+              break;
+            }
+
+            // Check if the current sprite pixel is 1 (MSB is col 0)
+            uint8_t sprite_pixel = (sprite_byte >> (7 - col)) & 1;
+            if (!sprite_pixel) {
+              continue;
+            }
+
+            // Calculate byte index and bit offset in 1-bit framebuffer
+            size_t byte_idx = (y * VM_FRAMEBUF_WIDTH + x) / 8;
+            size_t bit_offset = 7 - (x % 8);
+
+            // Check collision: screen pixel is currently 1 and will be unset
+            if ((ctx->framebuffer[byte_idx] >> bit_offset) & 1) {
+              ctx->registers.v[0xF] = 1;
+            }
+
+            // XOR pixel onto the screen
+            ctx->framebuffer[byte_idx] ^= (1 << bit_offset);
+          }
+        }
 
         break;
       }
@@ -233,8 +290,10 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
 
         switch (nn) {
           case 0x9E:
+            // Skip the next instruction if the key stored in VX is pressed.
             break;
           case 0xA1:
+            // Skip the next instruction if the key stored in VX is not pressed.
             break;
         }
 
@@ -243,6 +302,7 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
     case 0xF:
       {
         uint8_t nn = opcode_nn(code);
+        uint8_t x = opcode_x(code);
 
         switch (nn) {
           case 0x07:
@@ -256,6 +316,10 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
           case 0x1E:
             break;
           case 0x29:
+            // Set I to the memory address of the sprite for digit in Vx (0x0 - 0xF)
+            ctx->registers.i =
+                VM_FONT_LOAD_ADDR +
+                ((ctx->registers.v[x] & 0x0F) * VM_FONT_CHAR_HEIGHT);
             break;
           case 0x33:
             break;

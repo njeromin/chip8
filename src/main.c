@@ -47,7 +47,6 @@ int main(int argc, char* argv[]) {
   enum vm_exec_res exec_res;
   while ((exec_res = vm_exec_next(&vm)) == VM_EXEC_RES_CONTINUE) {
     display_show(0, 0, vm.framebuffer);
-    platform_sleep(1000 / 60);
   }
 
   switch (exec_res) {
