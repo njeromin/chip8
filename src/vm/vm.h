@@ -36,7 +36,7 @@ struct vm_reg {
 
 struct vm_ctx {
   struct vm_reg registers;
-  uint8_t stack[VM_STACK_SIZE];
+  uint16_t stack[VM_STACK_SIZE];
   uint8_t memory[VM_MEMORY_SIZE];
   uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES];
   bool should_draw;

@@ -5,6 +5,7 @@
 #include "debug/debug.h"
 #include "io/display.h"
 #include "platform/thread.h"
+#include "vm/opcode.h"
 #include "vm/vm.h"
 
 int main(int argc, char* argv[]) {

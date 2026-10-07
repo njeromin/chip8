@@ -77,6 +77,7 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
             // Return.
             ctx->registers.pc = ctx->stack[ctx->registers.sp];
             ctx->registers.sp -= 1;
+            skip_pc_increment = true;
             break;
           case 0x000:
             // Nop
@@ -108,7 +109,7 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
       {
         // Call subroutine at NNN.
         ctx->registers.sp += 1;
-        ctx->stack[ctx->registers.sp] = ctx->registers.pc;
+        ctx->stack[ctx->registers.sp] = ctx->registers.pc + sizeof(opcode_t);
         ctx->registers.pc = opcode_nnn(code);
         skip_pc_increment = true;
         break;
@@ -272,7 +273,7 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
         uint8_t x = opcode_x(code);
         uint8_t y = opcode_y(code);
 
-        if (ctx->registers.v[x] > ctx->registers.v[y]) {
+        if (ctx->registers.v[x] != ctx->registers.v[y]) {
           ctx->registers.pc += sizeof(opcode_t);
         }
 
@@ -395,10 +396,10 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
             break;
           case 0x1E:
             // Add VX to I.
-            ctx->registers.i = ctx->registers.v[x];
+            ctx->registers.i += ctx->registers.v[x];
             break;
           case 0x29:
-            // Set I to the memory address of the sprite for digit in Vx (0x0 - 0xF)
+            // Set I to the memory address of the sprite for digit in Vx (0x0 - 0xF).
             ctx->registers.i =
                 VM_FONT_LOAD_ADDR +
                 ((ctx->registers.v[x] & 0x0F) * VM_FONT_CHAR_HEIGHT);
