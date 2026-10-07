@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "vm.h"
+#include "io/display.h"
+#include "platform/thread.h"
+#include "vm/vm.h"
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
@@ -43,12 +45,16 @@ int main(int argc, char* argv[]) {
   }
 
   enum vm_exec_res exec_res;
-  while ((exec_res = vm_exec_next(&vm)) == VM_EXEC_RES_CONTINUE) {}
+  while ((exec_res = vm_exec_next(&vm)) == VM_EXEC_RES_CONTINUE) {
+    display_show(0, 0, vm.framebuffer);
+    platform_sleep(1000 / 60);
+  }
 
   switch (exec_res) {
     case VM_EXEC_RES_COMPLETE:
       break;
     case VM_EXEC_RES_INVALID_INSTR:
+      fprintf(stderr, "Encountered invalid instruction.");
       break;
     default:
       fprintf(stderr, "Unexpected execution result encountered.");

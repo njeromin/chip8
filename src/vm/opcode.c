@@ -1,4 +1,5 @@
-#include "opcode.h"
+#include "vm/opcode.h"
+
 #include <endian.h>
 
 opcode_t opcode_from_u8s(uint8_t left, uint8_t right) {

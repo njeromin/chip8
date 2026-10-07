@@ -37,7 +37,7 @@ struct vm_ctx {
   struct vm_reg registers;
   uint8_t stack[VM_STACK_SIZE];
   uint8_t memory[VM_MEMORY_SIZE];
-  uint8_t framebuffer[VM_FRAMEBUF_WIDTH_BYTES][VM_FRAMEBUF_HEIGHT_BYTES];
+  uint8_t framebuffer[VM_FRAMEBUF_WIDTH_BYTES * VM_FRAMEBUF_HEIGHT_BYTES];
 };
 
 void vm_ctx_init(struct vm_ctx* ctx);

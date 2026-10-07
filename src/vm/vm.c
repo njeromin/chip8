@@ -1,10 +1,11 @@
-#include "vm.h"
+#include "vm/vm.h"
 
 #include <endian.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include "opcode.h"
+#include "vm/opcode.h"
 
 static void clear_display(struct vm_ctx* ctx) {
   memset(ctx->framebuffer, 0,
@@ -209,13 +210,63 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
         break;
       }
     case 0xC:
-      break;
+      {
+        uint8_t x = opcode_x(code);
+        uint8_t nn = opcode_nn(code);
+
+        ctx->registers.v[x] = (rand() % 255) & nn;
+
+        break;
+      }
     case 0xD:
-      break;
+      {
+        // Draw a sprite at the coordinate (VX, VY) that has a width of 8 pixels, and a height of N pixels.
+        uint8_t x = opcode_x(code);
+        uint8_t y = opcode_y(code);
+        uint8_t n = opcode_n(code);
+
+        break;
+      }
     case 0xE:
-      break;
+      {
+        uint8_t nn = opcode_nn(code);
+
+        switch (nn) {
+          case 0x9E:
+            break;
+          case 0xA1:
+            break;
+        }
+
+        break;
+      }
     case 0xF:
-      break;
+      {
+        uint8_t nn = opcode_nn(code);
+
+        switch (nn) {
+          case 0x07:
+            break;
+          case 0x0A:
+            break;
+          case 0x15:
+            break;
+          case 0x18:
+            break;
+          case 0x1E:
+            break;
+          case 0x29:
+            break;
+          case 0x33:
+            break;
+          case 0x55:
+            break;
+          case 0x65:
+            break;
+        }
+
+        break;
+      }
   }
 
   if (!skip_pc_increment) {
