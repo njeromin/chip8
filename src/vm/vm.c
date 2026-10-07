@@ -419,9 +419,10 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
           case 0x55:
             {
               // Store V0 to VX in memory, starting at address I.
+              uint16_t x = opcode_x(code);
               uint16_t i_addr = ctx->registers.i;
 
-              for (uint16_t v_idx = 0; v_idx < VM_REG_V_COUNT; v_idx++) {
+              for (uint16_t v_idx = 0; v_idx <= x; v_idx++) {
                 uint8_t reg_value = ctx->registers.v[v_idx];
                 ctx->memory[i_addr + v_idx] = reg_value;
               }
@@ -431,9 +432,10 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
           case 0x65:
             {
               // Fill V0 to VX with values from memory, starting at address I.
+              uint16_t x = opcode_x(code);
               uint16_t i_addr = ctx->registers.i;
 
-              for (uint16_t v_idx = 0; v_idx < VM_REG_V_COUNT; v_idx++) {
+              for (uint16_t v_idx = 0; v_idx <= x; v_idx++) {
                 ctx->registers.v[v_idx] = ctx->memory[i_addr + v_idx];
               }
 
