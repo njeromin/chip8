@@ -404,11 +404,40 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
                 ((ctx->registers.v[x] & 0x0F) * VM_FONT_CHAR_HEIGHT);
             break;
           case 0x33:
-            break;
+            {
+              // Store the BCD representation of VX in I (hundreds), I+1 (tens), I+2 (ones).
+              uint8_t value = ctx->registers.v[x];
+              uint16_t i_addr = ctx->registers.i;
+
+              ctx->memory[i_addr] = value / 100;
+              ctx->memory[i_addr + 1] = (value / 10) % 10;
+              ctx->memory[i_addr + 2] = value % 10;
+
+              break;
+            }
           case 0x55:
-            break;
+            {
+              // Store V0 to VX in memory, starting at address I.
+              uint16_t i_addr = ctx->registers.i;
+
+              for (uint16_t v_idx = 0; v_idx < VM_REG_V_COUNT; v_idx++) {
+                uint8_t reg_value = ctx->registers.v[v_idx];
+                ctx->memory[i_addr + v_idx] = reg_value;
+              }
+
+              break;
+            }
           case 0x65:
-            break;
+            {
+              // Fill V0 to VX with values from memory, starting at address I.
+              uint16_t i_addr = ctx->registers.i;
+
+              for (uint16_t v_idx = 0; v_idx < VM_REG_V_COUNT; v_idx++) {
+                ctx->registers.v[v_idx] = ctx->memory[i_addr + v_idx];
+              }
+
+              break;
+            }
         }
 
         break;
