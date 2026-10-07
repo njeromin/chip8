@@ -193,25 +193,65 @@ enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
             ctx->registers.v[x] ^= ctx->registers.v[y];
             break;
           case 0x4:
-            // VX += VY
-            ctx->registers.v[x] += ctx->registers.v[y];
-            break;
+            {
+              // VX += VY
+              uint16_t res = ctx->registers.v[x] + ctx->registers.v[y];
+              uint8_t carry = (res > 0xFF) ? 1 : 0;
+
+              // VF = 0 when no overflow, 1 when overflow
+              ctx->registers.v[0xF] = carry;
+              ctx->registers.v[x] = (uint8_t)(res & 0xFF);
+
+              break;
+            }
           case 0x5:
-            // VX -= VY
-            ctx->registers.v[x] -= ctx->registers.v[y];
-            break;
+            {
+              // VX -= VY
+              uint8_t not_borrow = (ctx->registers.v[x] >= ctx->registers.v[y]) ? 1 : 0;
+              uint8_t res = ctx->registers.v[x] - ctx->registers.v[y];
+
+              // VF = 0 when underflow, 1 when no underflow.
+              ctx->registers.v[0xF] = not_borrow;
+              ctx->registers.v[x] = res;
+
+              break;
+            }
           case 0x6:
-            // VX >>= 1
-            ctx->registers.v[x] >>= 1;
-            break;
+            {
+              // VX >>= 1
+              uint8_t lsb = ctx->registers.v[x] & 0x1;
+              uint8_t res = ctx->registers.v[x] >> 1;
+
+              // Store LSB of VX prior to shift.
+              ctx->registers.v[0xF] = lsb;
+              ctx->registers.v[x] = res;
+
+              break;
+            }
           case 0x7:
-            // VX = VY - VX
-            ctx->registers.v[x] = ctx->registers.v[y] - ctx->registers.v[x];
-            break;
+            {
+              // VX = VY - VX
+              uint8_t not_borrow = (ctx->registers.v[y] >= ctx->registers.v[x]) ? 1 : 0;
+              uint8_t res = ctx->registers.v[y] - ctx->registers.v[x];
+
+              // VF = 0 when underflow, 1 when no underflow.
+              ctx->registers.v[0xF] = not_borrow;
+              ctx->registers.v[x] = res;
+
+              break;
+            }
           case 0xE:
-            // VX <<= 1
-            ctx->registers.v[x] <<= 1;
-            break;
+            {
+              // VX <<= 1
+              uint8_t msb = (ctx->registers.v[x] >> 7) & 0x1;
+              uint8_t res = ctx->registers.v[x] << 1;
+
+              // Store MSB of VX prior to shift.
+              ctx->registers.v[0xF] = msb;
+              ctx->registers.v[x] = res;
+
+              break;
+            }
         }
 
         break;
