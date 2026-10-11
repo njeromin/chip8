@@ -6,5 +6,7 @@
 
 void display_init();
 
+void display_exit();
+
 void display_show(size_t x, size_t y,
                   uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES]);

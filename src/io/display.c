@@ -1,10 +1,33 @@
 #include "io/display.h"
 
+#include <fcntl.h>
 #include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
 #include "vm/vm.h"
 
 static void move_cursor(size_t x, size_t y) {
   printf("\033[%lu;%luH", y, x);
+}
+
+static void enter_raw_mode(struct termios* orig_termios) {
+  struct termios new_termios;
+  tcgetattr(STDIN_FILENO, orig_termios);
+  new_termios = *orig_termios;
+
+  // Disable canonical mode (line buffering) and local echo
+  new_termios.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
+
+  // Make standard input non-blocking
+  int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+  fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+}
+
+static void restore_mode(struct termios* orig_termios) {
+  tcsetattr(STDIN_FILENO, TCSANOW, orig_termios);
+  int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+  fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK);
 }
 
 #define FULL_BOX "█"
@@ -19,9 +42,29 @@ static void calc_bit_pos(size_t x, size_t y,
   *bit_offset = 7 - (x % 8);
 }
 
+struct termios orig_termios;
+
 void display_init() {
+  // Switch to alternate screen.
+  printf("\033[?1049h");
+
+  enter_raw_mode(&orig_termios);
+
+  // Hide cursor.
+  printf("\033[?25l");
+
   // Clear the screen.
   printf("\e[1;1H\e[2J");
+}
+
+void display_exit() {
+  // Go back to regular screen.
+  printf("\033[?1049l");
+
+  restore_mode(&orig_termios);
+
+  // Restore cursor.
+  printf("\033[?25h");
 }
 
 void display_show(size_t display_x, size_t display_y,

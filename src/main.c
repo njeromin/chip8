@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,6 +49,9 @@ int main(int argc, char* argv[]) {
   }
 
   display_init();
+
+  atexit(display_exit);
+  signal(SIGINT, exit);
 
   enum vm_exec_res exec_res;
   while ((exec_res = vm_exec_next(&vm)) == VM_EXEC_RES_CONTINUE ||
