@@ -9,6 +9,11 @@
 #include "vm/opcode.h"
 #include "vm/vm.h"
 
+#define CPU_HZ 600
+#define TIMER_HZ 60
+#define INSTRUCTIONS_PER_FRAME (CPU_HZ / TIMER_HZ)
+#define FRAME_TIME_MS (1000 / TIMER_HZ)
+
 int main(int argc, char* argv[]) {
   if (argc < 2) {
     fprintf(stderr, "Usage: chip8 <filename>\n");
@@ -56,13 +61,30 @@ int main(int argc, char* argv[]) {
   enum vm_exec_res exec_res;
   while ((exec_res = vm_exec_next(&vm)) == VM_EXEC_RES_CONTINUE ||
          exec_res == VM_EXEC_RES_HALTED) {
+    // Execute a batch of instructions for this frame.
+    for (int i = 0; i < INSTRUCTIONS_PER_FRAME; i++) {
+      exec_res = vm_exec_next(&vm);
+      if (exec_res != VM_EXEC_RES_CONTINUE) {
+        break;
+      }
+    }
+
+    vm_tick_timers(&vm);
+
+    if (vm.registers.st > 0) {
+      display_play_buzzer();
+    }
+
     if (vm.should_draw) {
       display_show(0, 0, vm.framebuffer);
       vm.should_draw = false;
     }
 
+    // Infinite loop, refresh at a very slow rate.
     if (exec_res == VM_EXEC_RES_HALTED) {
       platform_sleep(1000);
+    } else {
+      platform_sleep(FRAME_TIME_MS);
     }
   }
 

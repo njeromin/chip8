@@ -49,6 +49,16 @@ enum vm_load_err vm_load_bin(struct vm_ctx* ctx, uint8_t* bin, size_t size) {
   return VM_LOAD_ERR_OK;
 }
 
+void vm_tick_timers(struct vm_ctx* ctx) {
+  if (ctx->registers.dt > 0) {
+    ctx->registers.dt -= 1;
+  }
+
+  if (ctx->registers.st > 0) {
+    ctx->registers.st -= 1;
+  }
+}
+
 enum vm_exec_res vm_exec_next(struct vm_ctx* ctx) {
   if (ctx->registers.pc >= VM_MEMORY_SIZE) {
     return VM_EXEC_RES_COMPLETE;

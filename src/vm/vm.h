@@ -51,6 +51,8 @@ enum vm_load_err {
 
 enum vm_load_err vm_load_bin(struct vm_ctx* ctx, uint8_t* bin, size_t size);
 
+void vm_tick_timers(struct vm_ctx* ctx);
+
 enum vm_exec_res {
   VM_EXEC_RES_INVALID_INSTR = -1,
   VM_EXEC_RES_CONTINUE = 0,

@@ -67,6 +67,11 @@ void display_exit() {
   printf("\033[?25h");
 }
 
+void display_play_buzzer() {
+  putchar('\a');
+  fflush(stdout);
+}
+
 void display_show(size_t display_x, size_t display_y,
                   uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES]) {
   move_cursor(display_x, display_y);
