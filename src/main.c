@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     case VM_LOAD_ERR_EXCEEDS_MEMORY:
       fprintf(stderr, "Load binary error: exceeds memory\n");
       return EXIT_FAILURE;
-    case VM_LOAD_ERR_OK:
+    case VM_LOAD_OK:
       break;
   }
 
@@ -72,25 +72,29 @@ int main(int argc, char* argv[]) {
     vm_tick_timers(&vm);
 
     if (vm.registers.st > 0) {
-      display_play_buzzer();
+      display_play_sound();
     }
 
     if (vm.should_draw) {
-      display_show(0, 0, vm.framebuffer);
+      display_update(0, 0, vm.framebuffer);
       vm.should_draw = false;
     }
 
-    // Infinite loop, refresh at a very slow rate.
+    // Infinite loop, so exit.
     if (exec_res == VM_EXEC_RES_HALTED) {
-      platform_sleep(1000);
-    } else {
-      platform_sleep(FRAME_TIME_MS);
+      break;
     }
+
+    platform_sleep(FRAME_TIME_MS);
   }
 
   switch (exec_res) {
     case VM_EXEC_RES_COMPLETE:
+      break;
     case VM_EXEC_RES_HALTED:
+      while (true) {
+        platform_sleep(1000);
+      };
       break;
     case VM_EXEC_RES_INVALID_INSTR:
       {
@@ -100,10 +104,23 @@ int main(int argc, char* argv[]) {
 
         fprintf(stderr, "Encountered invalid instruction: %s\n",
                 debug_instruction_id_class(id));
+
+        fprintf(stderr, "Virtual machine dump:\n");
+        debug_print_vm_info(stderr, &vm);
+
         break;
       }
     default:
       fprintf(stderr, "Unexpected execution result encountered.");
+      opcode_t op = opcode_from_u8s(vm.memory[vm.registers.pc],
+                                    vm.memory[vm.registers.pc + 1]);
+      uint8_t id = opcode_id(op);
+
+      fprintf(stderr, "Last instruction: %s\n", debug_instruction_id_class(id));
+
+      fprintf(stderr, "Virtual machine dump:\n");
+      debug_print_vm_info(stderr, &vm);
+
       return EXIT_FAILURE;
   }
 

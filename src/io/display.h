@@ -8,7 +8,7 @@ void display_init();
 
 void display_exit();
 
-void display_play_buzzer();
+void display_play_sound();
 
-void display_show(size_t x, size_t y,
-                  uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES]);
+void display_update(size_t x, size_t y,
+                    uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES]);

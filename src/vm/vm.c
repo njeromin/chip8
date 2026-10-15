@@ -36,7 +36,7 @@ void vm_ctx_init(struct vm_ctx* ctx) {
   ctx->should_draw = false;
 }
 
-enum vm_load_err vm_load_bin(struct vm_ctx* ctx, uint8_t* bin, size_t size) {
+enum vm_load_res vm_load_bin(struct vm_ctx* ctx, uint8_t* bin, size_t size) {
   if (size > (VM_MEMORY_SIZE - VM_PROG_LOAD_ADDR)) {
     return VM_LOAD_ERR_EXCEEDS_MEMORY;
   }
@@ -46,7 +46,7 @@ enum vm_load_err vm_load_bin(struct vm_ctx* ctx, uint8_t* bin, size_t size) {
   // Move program counter to load address.
   ctx->registers.pc = VM_PROG_LOAD_ADDR;
 
-  return VM_LOAD_ERR_OK;
+  return VM_LOAD_OK;
 }
 
 void vm_tick_timers(struct vm_ctx* ctx) {

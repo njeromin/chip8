@@ -25,6 +25,7 @@
 #define VM_FRAMEBUF_WIDTH_BYTES (VM_FRAMEBUF_WIDTH / 8)
 #define VM_FRAMEBUF_SIZE_BYTES (VM_FRAMEBUF_WIDTH_BYTES * VM_FRAMEBUF_HEIGHT)
 
+// Set of Chip8 registers.
 struct vm_reg {
   uint8_t v[VM_REG_V_COUNT];  // V registers
   uint8_t dt;                 // Delay timer
@@ -34,6 +35,7 @@ struct vm_reg {
   uint8_t sp;                 // Stack pointer
 };
 
+// Virtual machine context.
 struct vm_ctx {
   struct vm_reg registers;
   uint16_t stack[VM_STACK_SIZE];
@@ -42,15 +44,18 @@ struct vm_ctx {
   bool should_draw;
 };
 
+// Initialise a virtual machine context.
 void vm_ctx_init(struct vm_ctx* ctx);
 
-enum vm_load_err {
-  VM_LOAD_ERR_OK = 0,
+enum vm_load_res {
+  VM_LOAD_OK = 0,
   VM_LOAD_ERR_EXCEEDS_MEMORY = -1,
 };
 
-enum vm_load_err vm_load_bin(struct vm_ctx* ctx, uint8_t* bin, size_t size);
+// Load a binary into virtual machine memory.
+enum vm_load_res vm_load_bin(struct vm_ctx* ctx, uint8_t* bin, size_t size);
 
+// Tick the sound and delay timers.
 void vm_tick_timers(struct vm_ctx* ctx);
 
 enum vm_exec_res {
@@ -60,4 +65,5 @@ enum vm_exec_res {
   VM_EXEC_RES_HALTED = 2,
 };
 
+// Execute the next instruction in virtual machine memory.
 enum vm_exec_res vm_exec_next(struct vm_ctx* ctx);

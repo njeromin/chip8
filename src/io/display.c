@@ -67,13 +67,13 @@ void display_exit() {
   printf("\033[?25h");
 }
 
-void display_play_buzzer() {
+void display_play_sound() {
   putchar('\a');
   fflush(stdout);
 }
 
-void display_show(size_t display_x, size_t display_y,
-                  uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES]) {
+void display_update(size_t display_x, size_t display_y,
+                    uint8_t framebuffer[VM_FRAMEBUF_SIZE_BYTES]) {
   move_cursor(display_x, display_y);
 
   for (size_t y = 0; y + 1 < VM_FRAMEBUF_HEIGHT; y += 2) {
